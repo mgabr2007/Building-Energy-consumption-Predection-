@@ -60,6 +60,16 @@ if uploaded_file is not None:
         st.write(f"Intercept: {model.intercept_}")
         st.write(f"Coefficients: {model.coef_}")
 
+        st.write("""
+        ### Understanding Model Coefficients
+
+        The linear regression model provides us with two key parameters:
+        1. **Intercept:** This is the baseline value of the energy consumption when the year is zero. It essentially represents the starting point of our prediction line.
+        2. **Coefficients:** These represent the change in energy consumption for each additional year. In other words, the coefficient indicates how much the energy consumption is expected to increase or decrease per year.
+
+        For example, if the coefficient is 5000, it means that each year, the energy consumption is expected to increase by 5000 units.
+        """)
+
         start_year = df['year'].max() + 1
         periods = st.slider("Select number of years to predict into the future", 1, 24, 12)
         future_df = predict_future(model, start_year, periods)
