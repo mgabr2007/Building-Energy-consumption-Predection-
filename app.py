@@ -11,8 +11,17 @@ def load_data(uploaded_file):
 
 # Function to train a simple linear regression model
 def train_model(df):
-    df['Date'] = pd.to_datetime(df['Date'])
-    df.set_index('Date', inplace=True)
+    date_col = None
+    for col in df.columns:
+        if 'date' in col.lower():
+            date_col = col
+            break
+    if date_col is None:
+        st.error("No column containing 'date' found in the uploaded file.")
+        return None
+
+    df[date_col] = pd.to_datetime(df[date_col])
+    df.set_index(date_col, inplace=True)
     df['Month'] = df.index.month
     df['Year'] = df.index.year
 
@@ -45,23 +54,23 @@ if uploaded_file is not None:
     st.dataframe(df)
 
     model = train_model(df)
-    
-    st.write("Training complete. Model coefficients:")
-    st.write(f"Intercept: {model.intercept_}")
-    st.write(f"Coefficients: {model.coef_}")
+    if model is not None:
+        st.write("Training complete. Model coefficients:")
+        st.write(f"Intercept: {model.intercept_}")
+        st.write(f"Coefficients: {model.coef_}")
 
-    periods = st.slider("Select number of months to predict into the future", 1, 24, 12)
-    future_df = predict_future(model, periods)
+        periods = st.slider("Select number of months to predict into the future", 1, 24, 12)
+        future_df = predict_future(model, periods)
 
-    st.write("Future Predictions:")
-    st.dataframe(future_df[['Date', 'Predicted Consumption']])
+        st.write("Future Predictions:")
+        st.dataframe(future_df[['Date', 'Predicted Consumption']])
 
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df['Consumption'], label='Historical Consumption')
-    ax.plot(future_df['Date'], future_df['Predicted Consumption'], label='Predicted Consumption', linestyle='--')
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Consumption")
-    ax.legend()
-    st.pyplot(fig)
+        fig, ax = plt.subplots()
+        ax.plot(df.index, df['Consumption'], label='Historical Consumption')
+        ax.plot(future_df['Date'], future_df['Predicted Consumption'], label='Predicted Consumption', linestyle='--')
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Consumption")
+        ax.legend()
+        st.pyplot(fig)
 
 st.write("Please upload an Excel file to get started.")
